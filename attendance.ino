@@ -40,11 +40,7 @@ int blocks[] = {4,5,6,8,9};
 MFRC522 mfrc522(SS_PIN, RST_PIN);
 MFRC522::MIFARE_Key key;  
 MFRC522::StatusCode status;
-//------------------------------------------------------------
-/* Be aware of Sector Trailer Blocks */
-int blockNum = 2;  
-/* Create another array to read data from Block */
-/* Legthn of buffer should be 2 Bytes more than the size of Block (16 Bytes) */
+
 byte bufferLen = 18;
 byte readBlockData[18];
 //------------------------------------------------------------
@@ -154,9 +150,6 @@ void loop() {
     client->setContentTypeHeader("application/json");
   }
   if (client != nullptr){
-    //when below if condition is TRUE then it takes more time then usual, It means the device 
-    //is disconnected from the google sheet server and it takes time to connect again
-    //NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
     if (!client->connected()){
       int retval = client->connect(host, httpsPort);
       if (retval != 1){
@@ -169,7 +162,7 @@ void loop() {
         return; //Reset the loop
       }
     }
-    //NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
+   
   }
   else{Serial.println("Error creating client object!"); Serial.println("else");}
   //----------------------------------------------------------------
@@ -187,38 +180,8 @@ void loop() {
   /* Read data from the same block */
   Serial.println();
   Serial.println(F("Reading last data from RFID..."));  
-  //----------------------------------------------------------------
-  String values = "", data;
-  /*
-  //creating payload - method 1
-  //----------------------------------------------------------------
-  ReadDataFromBlock(blocks[0], readBlockData); //student id
-  data = String((char*)readBlockData); data.trim();
-  student_id = data;
-  //----------------------------------------------------------------
-  ReadDataFromBlock(blocks[1], readBlockData); //first name
-  data = String((char*)readBlockData); data.trim();
-  first_name = data;
-  //----------------------------------------------------------------
-  ReadDataFromBlock(blocks[2], readBlockData); //last name
-  data = String((char*)readBlockData); data.trim();
-  last_name = data;
-  //----------------------------------------------------------------
-  ReadDataFromBlock(blocks[3], readBlockData); //phone number
-  data = String((char*)readBlockData); data.trim();
-  phone_number = data;
-  //----------------------------------------------------------------
-  ReadDataFromBlock(blocks[4], readBlockData); //address
-  data = String((char*)readBlockData); data.trim();
-  address = data; data = "";
-  //----------------------------------------------------------------
-  values = "\"" + student_id + ",";
-  values += first_name + ",";
-  values += last_name + ",";
-  values += phone_number + ",";
-  values += address + "\"}";
-  //----------------------------------------------------------------*/
-  //creating payload - method 2 - More efficient
+  
+  //creating payload 
   for (byte i = 0; i < total_blocks; i++) {
     ReadDataFromBlock(blocks[i], readBlockData);
     //*************************************************
@@ -228,13 +191,6 @@ void loop() {
       student_id = data;
       values = "\"" + data + ",";
     }
-    //*************************************************
-    /*else if(i == total_blocks-1){
-      data = String((char*)readBlockData);
-      data.trim();
-      values += data + "\"}";
-    }*/
-    //*************************************************
     else{
       data = String((char*)readBlockData);
       data.trim();
@@ -281,13 +237,7 @@ void loop() {
   delay(5000);
 }
 
-
-/****************************************************************************************************
- * 
-****************************************************************************************************/
-/****************************************************************************************************
  * ReadDataFromBlock() function
- ****************************************************************************************************/
 void ReadDataFromBlock(int blockNum, byte readBlockData[]) 
 { 
   //----------------------------------------------------------------------------
